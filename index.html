@@ -13,14 +13,23 @@
 	</div>
 
     <div class="main">
-        <table>
-            <tr>
-                <th>Site</th>
-                <th>Result 1</th>
-                <th>Result 2</th>
-                <th>Result 3</th>
-            </tr>
-        </table>
+        <div>
+            <table class="mainTable">
+                <tr>
+                    <th>Site</th>
+                    <th>Result 1</th>
+                    <th>Result 2</th>
+                    <th>Result 3</th>
+                </tr>
+            </table>
+            <button id="add_row" onclick="add_row()">Add Row</button>
+            <button id="add_row" onclick="compute()">Compute</button>
+        </div>
+        
+
+        <div id="outputs">
+
+        </div>
     </div>
 
 	
@@ -33,19 +42,76 @@
 
 
     <script>
-        const table = document.getElementById("myTable");
 
-        // Create an empty <tr> element and add it to the 1st position of the table:
-        var row = table.insertRow(0);
+        function add_row() {
+            let table = document.getElementsByClassName("mainTable")[0];
+            let row_num = table.rows.length;
+            let row = table.insertRow(row_num);
 
-        // Insert new cells (<td> elements) at the 1st and 2nd position of the "new" <tr> element:
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
+            let cell0 = row.insertCell(0);
+            let cell1 = row.insertCell(1);
+            let cell2 = row.insertCell(2);
+            let cell3 = row.insertCell(3);
 
-        // Add some text to the new cells:
-        cell1.innerHTML = "NEW CELL1";
-        cell2.innerHTML = "NEW CELL2";
-        
+            cell0.innerHTML = `<input class="sitename" id="sitename-${row_num}" placeholder="Site Name">`;
+            cell1.innerHTML = `<input class="odds1" id="odds1-${row_num}" placeholder="Odds 1">`;
+            cell2.innerHTML = `<input class="odds2" id="odds2-${row_num}" placeholder="Odds 2">`;
+            cell3.innerHTML = `<input class="odds3" id="odds3-${row_num}" placeholder="Odds 3">`;
+        }
+
+
+        function compute() {
+            const num_cols = document.getElementsByClassName("mainTable")[0].rows[0].cells.length;
+            const outcome_types = num_cols - 1;
+            console.log("outcome_types "+outcome_types)
+            let best_odds = new Array();
+
+            for(let i = 1; i <= outcome_types; i++) {
+                let column = document.getElementsByClassName("odds"+i);
+                let best_in_column = 0;
+                for(let j = 0; j < column.length; j++) {
+                    let curr_odds = Number(column[j].value);
+                    best_in_column = Math.max(best_in_column, curr_odds);
+                }
+
+                best_odds[i-1] = best_in_column;
+            }
+            
+            console.log(best_odds)
+
+            let outputs = document.getElementById('outputs');
+            while (outputs.hasChildNodes()) {
+                outputs.removeChild(outputs.lastChild);
+            }
+
+            try {
+                let output = "";
+                // show best odds for each outcome
+                for(let i = 0; i < outcome_types; i++) {
+                    output += `Best odds for column ${i+1} is ${best_odds[i]} with implied probability ${(1/best_odds[i]).toFixed(3)} <br>`;
+                }
+
+                // calculate total implied odds
+                let total_implied_odds = 0;
+                for(n of best_odds) {
+                    console.log(n + " " + (1/n));
+                    total_implied_odds += (1/n);
+                }
+                total_implied_odds = total_implied_odds.toFixed(3)
+
+                if(total_implied_odds < 1) {
+                    output += `Total implied odds = ${total_implied_odds}, arbitrage is possible!`;
+                } else {
+                    output += `Total implied odds = ${total_implied_odds}, arbitrage is not possible`;
+                }
+
+                outputs.innerHTML = '<p>'+output+'</p>';
+                console.log('<p>'+output+'</p>')
+            } catch (e) {
+                console.error(e);
+                outputs.innerHTML = '<p>Something seems to have broken; did you forget an input?</p>'
+            }
+        }
     </script>
 </body>
 </html>
