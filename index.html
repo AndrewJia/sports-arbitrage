@@ -27,7 +27,7 @@
         </div>
         
 
-        <div id="outputs">
+        <div class="outputs" id="outputs">
 
         </div>
     </div>
@@ -53,32 +53,46 @@
             let cell2 = row.insertCell(2);
             let cell3 = row.insertCell(3);
 
-            cell0.innerHTML = `<input class="sitename" id="sitename-${row_num}" placeholder="Site Name">`;
+            cell0.innerHTML = `<input class="sitename" id="sitename-${row_num}" placeholder="Site Name"><input class="checkbox" type="checkbox" id="american-${row_num}">`;
             cell1.innerHTML = `<input class="odds1" id="odds1-${row_num}" placeholder="Odds 1">`;
             cell2.innerHTML = `<input class="odds2" id="odds2-${row_num}" placeholder="Odds 2">`;
             cell3.innerHTML = `<input class="odds3" id="odds3-${row_num}" placeholder="Odds 3">`;
         }
 
+        // convert american odds to decimal
+        function american_to_decimal(american) {
+            if(american > 0) {
+                return (1 + (american / 100)).toFixed(3)
+            } else {
+                return (1 - (100 / american)).toFixed(3)
+            }
+        }
+
 
         function compute() {
             const num_cols = document.getElementsByClassName("mainTable")[0].rows[0].cells.length;
+            const american = document.getElementsByClassName("checkbox");
             const outcome_types = num_cols - 1;
-            console.log("outcome_types "+outcome_types)
             let best_odds = new Array();
 
+            // calculate best odds in each column
             for(let i = 1; i <= outcome_types; i++) {
                 let column = document.getElementsByClassName("odds"+i);
                 let best_in_column = 0;
                 for(let j = 0; j < column.length; j++) {
                     let curr_odds = Number(column[j].value);
+                    if(american[j].checked) {
+                        console.log("american "+curr_odds+" = "+american_to_decimal(curr_odds)+" decimal");
+                        curr_odds = american_to_decimal(curr_odds);
+                    }
+                    
                     best_in_column = Math.max(best_in_column, curr_odds);
                 }
 
                 best_odds[i-1] = best_in_column;
             }
             
-            console.log(best_odds)
-
+            // clear output div
             let outputs = document.getElementById('outputs');
             while (outputs.hasChildNodes()) {
                 outputs.removeChild(outputs.lastChild);

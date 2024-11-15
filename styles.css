@@ -43,6 +43,16 @@ button {
 }
 
 
+.checkbox {
+    width:16px;
+    height:16px;
+    background:white;
+    border-radius:5px;
+    border:2px solid #555;
+	text-align: center;
+}
+
+
 .title {
 	color: #1F2937;
 	font-size: 36px;
